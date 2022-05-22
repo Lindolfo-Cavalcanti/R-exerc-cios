@@ -1,0 +1,207 @@
+TRATAMENTO DOS DADOS CHUN.CSV
+
+ESCOLHER DIRETÓRIO
+
+```{r}
+setwd("~/R/Data")
+```
+
+CARREGAR DADOS (OBS: OS DADOS TEM QUE ESTÁ NA MESMA PASTA DO NOTEBOOK, NESSE CASO '/DATA')
+
+```{r}
+dados <- read.csv('Churn.csv', sep = ';', na.strings = '', stringsAsFactors = T)
+```
+
+CARREGAR PACOTE TIDYVERSE
+
+```{r}
+library(tidyverse)
+```
+COMANDOS ÚTEIS PARA EXPLORAR OS DADOS
+
+```{r}
+summary(dados)
+glimpse(dados)
+colnames(dados)
+rownames(dados)
+dim(dados)
+```
+
+CRIANDO COLUNAS
+
+```{r}
+dados['teste'] <- dados$X0 + dados$X1
+
+colnames(dados)
+```
+
+EXCLUINDO COLUNAS
+
+```{r}
+dados$teste <- NULL
+
+colnames(dados)
+```
+
+DAR NOME ÀS COLUNAS 
+
+```{r}
+colnames(dados) <- c('id','score', 'estado', 'genero', 'idade', 'patrimonio', 'saldo', 'produtos', 'tem_cart_credito', 'ativo', 'salario', 'saiu')
+
+head(dados)
+```
+
+EXPLORAÇÃO DE DADOS, COLUNAS CATEGÓRICAS
+
+```{r}
+#ESTADO
+
+countse <- table(dados$estado)
+countse %>% barplot(main = 'ESTADOS', xlab = 'ESTADOS')
+
+#GENERO
+
+countsg <- table(dados$genero)
+countsg %>% barplot(main = 'GÊNERO', xlab = 'GÊNERO')
+```
+
+EXPLORAÇÃO DE DADOS, COLUNAS NUMÉRICAS
+
+```{r}
+#SCORE
+
+dados$score %>% summary()
+dados$score %>% boxplot()
+dados$score %>% hist()
+
+#IDADE
+
+dados$idade %>% summary()
+dados$idade %>% boxplot()
+dados$idade %>% hist()
+
+#SALDO
+
+dados$saldo %>% summary()
+dados$saldo %>% boxplot()
+dados$saldo %>% hist()
+
+```
+
+VALORES FALTANTES (NA's)
+
+```{r}
+dados[!complete.cases(dados),]
+```
+
+TRATAMENTO SALÁRIOS
+
+```{r}
+summary(dados$salario)
+mediana <- median(dados$salario, na.rm = T)
+
+#SUBSTITUIR NA's PELA MEDIANA
+dados[is.na(dados$salario),]$salario <- mediana
+
+#BUSCAR SALÁRIOS PARA CHECAR
+dados[!complete.cases(dados$salario),]
+```
+
+TRATAMENTO FALTA DE PADRONIZAÇÃO NO GÊNERO
+
+```{r}
+dados$genero %>% unique() 
+summary(dados$genero)
+
+#TRANSFORMAR F E FEM EM FEMININO
+#TRANSFORMA NA's E M EM MASCULINO (VALORES CATEGÓRICOS SUBSTITUI NA PELA MODA)
+dados[is.na(dados$genero) | dados$genero == 'M',]$genero <- 'Masculino'
+dados[dados$genero == 'F' | dados$genero == 'Fem',]$genero <- 'Feminino'
+
+# VER RESULTADOS
+summary(dados$genero)
+
+#REMOVER LEVELS NÃO UTILIZADOS
+dados$genero <- factor(dados$genero)
+
+# VER RESULTADOS
+summary(dados$genero)
+```
+
+TRATANDO IDADES FORA DE DOMÍNIO
+
+```{r}
+summary(dados$idade)
+
+# VISUALIZAR OS VALORES QUE ESTÃO FORA DE DOMÍNIO 
+dados[dados$idade > 110 | dados$idade < 0,]$idade
+
+# TEMOS IDADES NA?
+dados[is.na(dados$idade),]
+
+#VALORES PROBLEMÁTICOS EM IDADE É POSSÍVEL PREENCHER COM A MEDIANA
+medianai <- median(dados$idade)
+
+#SUBSTITUIR VALORES PROBLEMÁTICOS PELA MEDIANA
+dados[dados$idade > 110 | dados$idade < 0,]$idade <- medianai
+
+# CONFERIR
+summary(dados$idade)
+dados[dados$idade > 110 | dados$idade < 0,]$idade
+```
+
+TRATAMENTO DE DADOS DUPLICADOS
+
+```{r}
+# BUSCAR DADOS DUPLICADOS EM ID
+x <- dados[duplicated(dados$id), ]
+x #linha 82 está duplicada
+
+# EXCLUIR A AMOSTRA DUPLICADA PELO ID, NÃO PELO ÍNDICE(dados <- dados[-c(82),])
+dados <- dados[!dados$id %in% c(x$id), ]
+
+# BUSCAMOS A LINHA QUE ESTAVA DUPLICADA
+dados[dados$id == x$id , ]
+
+# VERIFICANDO NOVAMENTE SE HÁ DADOS DUPLICADOS
+x <- dados[duplicated(dados$id), ]
+x
+```
+
+TRATAMENTO DE ESTADOS FORA DO DOMÍNIO
+
+```{r}
+# VERIFICAR OS ESTADOS FORA DE DOMÍNIO
+unique(dados$estado)
+summary(dados$estado)
+
+# PREENCHER COM A MODA (DADOS CATEGÓRICOS SE PREENCHE COM MODO)
+dados[!dados$estado %in% c('RS', 'SC', 'PR'),]$estado <- 'RS'
+summary(dados$estado)
+
+# REMOVER LEVELS NÃO UTILIZADOS
+dados$estado <- factor(dados$estado)
+summary(dados$estado)
+```
+
+TRATAMENTO DE OUTLIERS
+
+```{r}
+# OUTLIERS, CRIANDO UM PARAMETRO COM O DESVIO PADRÃO
+desv <- sd(dados$salario, na.rm = T) #CRIANDO VARIÁVEL PARA O DESVIO PADRÃO
+desv
+
+dados[dados$salario >= 2 * desv,]$salario
+
+# OUTRA FORMA, RESULTADOS SEMELHANTES MAS SEM OS NA's
+boxplot(dados$salario)
+x <- boxplot(dados$salario)$out
+x
+
+# ATUALIZAMOS TODOS PARA A MEDIANA
+median(dados$salario)
+dados[dados$salario >= 2 * desv,]$salario <- median(dados$salario)
+
+# CHECAMOS SE SAIRAM OS OUTLIERS
+dados[dados$salario >= 2 * desv,]$salario
+```

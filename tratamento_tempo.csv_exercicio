@@ -1,0 +1,69 @@
+TRATAR DADOS 'TEMPO.CSV'
+
+```{r}
+tempo <- read.csv('tempo.csv', sep = ';')
+View(tempo)
+colnames(tempo) <- c('aparencia', 'temperatura', 'umidade', 'vento', 'jogar')
+```
+
+APARÊNCIA: SOL, NUBLADO E CHUVA
+
+```{r}
+summary(tempo$aparencia)
+tempo$aparencia <- as.factor(tempo$aparencia)
+summary(tempo$aparencia)
+
+tempo[!tempo$aparencia %in% c('chuva', 'nublado', 'sol'), ]$aparencia <- 'sol'
+summary(tempo$aparencia)
+
+tempo$aparencia <- factor(tempo$aparencia)
+summary(tempo$aparencia)
+```
+
+TEMPERATURA: -130 ~ 130F
+
+```{r}
+summary(tempo$temperatura)
+
+tempo[tempo$temperatura >130 | tempo$temperatura < -130, ]$temperatura
+tempo[tempo$temperatura > 130 | tempo$temperatura < -130, ]$temperatura <- median(tempo$temperatura)
+
+summary(tempo$temperatura)
+```
+
+
+UMIDADE: 0 ~ 100
+
+```{r}
+summary(tempo$umidade)
+tempo[is.na(tempo$umidade), ]$umidade <- median(tempo$umidade, na.rm = T)
+summary(tempo$umidade)
+
+tempo[tempo$umidade > 100 | tempo$umidade < 0, ]$umidade
+tempo[tempo$umidade > 100 | tempo$umidade < 0, ]$umidade <- median(tempo$umidade, na.rm = T)
+
+summary(tempo$umidade)
+```
+
+
+JOGAR: SIM/NÃO
+
+```{r}
+summary(tempo$jogar)
+
+tempo$jogar <- as.factor(tempo$jogar)
+```
+
+
+TRATAR VALORES NA's
+
+```{r}
+summary(tempo)
+
+tempo$vento <- as.factor(tempo$vento)
+tempo[tempo$vento != c('FALSO', 'VERDADEIRO'), ]$vento
+
+tempo[tempo$vento != c('FALSO', 'VERDADEIRO'), ]$vento <- 'FALSO'
+
+tempo$vento <- factor(tempo$vento)
+```

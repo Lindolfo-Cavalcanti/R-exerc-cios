@@ -1,0 +1,156 @@
+```{r}
+setwd('~/R/Data/')
+library(tidyverse)
+```
+
+HISTOGRAMA
+
+```{r}
+trees
+
+trees %>% head()
+trees$Height %>% hist()
+trees$Height %>% hist(main = 'Árvores', ylab = 'Frequência', xlab = 'Altura', col = 'blue')
+trees$Height %>% hist(main = 'Árvores', ylab = 'Frequência', xlab = 'Altura', col = 'blue', density = 20, breaks = 20)
+```
+
+DENSIDADE
+
+```{r}
+densidade <- density(trees$Height)
+plot(densidade)
+```
+
+DENSIDADE SOBRE O HISTOGRAMA, PARÂMETRO PAR
+
+```{r}
+# EXECUTAR COM CTRL + SHIFT + ENTER
+
+hist(trees$Height, main = NULL, xlab = NULL, ylab = NULL)
+par(new = TRUE) # informa ao R que o próximo comando irá ser uma sobreposição
+plot(densidade)
+```
+
+DISPERSÃO
+
+```{r}
+plot(trees$Girth, trees$Volume) # plot é um comando generico de graficos que se adapta às informações disponibilizdas
+plot(trees$Girth, trees$Volume, main = 'Àrvores', xlab = 'Circuferência', ylab = 'Volume', col = 'blue')
+
+# PCH muda o elemento gráfico
+plot(trees$Girth, trees$Volume, main = 'Árvore', xlab = 'Circuferência', ylab = 'Volume', col = 'blue', pch = 20)
+```
+
+MUDA TIPO
+
+```{r}
+plot(trees$Girth, trees$Volume, main = 'Árvore', xlab = 'Circuferência', ylab = 'Volume', col = 'blue', pch = 20, type = 'l')
+```
+
+TREMULAÇÃO, DIMINUI SOBRE POSIÇÃO
+
+```{r}
+# jitter(trees$Girth) & trees$Volume %>% plot(main = 'Árvore', xlab = 'Circuferência', ylab = 'Volume', col = 'blue') ESSE FICA DIFERENTE E EU NÃO SEI O PORQUÊ, PESQUISAR.
+
+plot(jitter(trees$Girth), trees$Volume, main = 'Árvore', xlab = 'Circuferência', ylab = 'Volume', col = 'blue')
+```
+
+LEGENDA COM DIMENSÃO CATEGÓRICA
+
+```{r}
+CO2
+
+plot(CO2$conc, CO2$uptake, pch = 20, col = CO2$Treatment)
+
+# legend(posição, valores, como vai preencher)
+legend('bottomright', legend = c('nonchilled', 'chilled'), cex = 0.8, fill = c('black', 'red'))
+```
+
+NOVOS DADOS
+
+```{r}
+plot(trees)
+```
+
+DIVISÃO DE TELAS
+
+```{r}
+# EXECUTAR COM CTRL + SHIFT + ENTER
+split.screen(figs = c(2,2))
+
+screen(1)
+plot(trees$Girth, trees$Volume)
+
+screen(2)
+plot(trees$Girth, trees$Height)
+
+screen(3)
+plot(trees$Girth, trees$Volume)
+
+screen(4)
+hist(trees$Volume)
+
+close.screen(all = T)
+```
+
+BOXPLOT
+
+```{r}
+trees$Volume %>% boxplot(main = 'Árvores', xlab = 'Volume')
+trees$Volume %>% boxplot(main = 'Árvores', xlab = 'Volume', horizontal = T)
+trees$Volume %>% boxplot(main = 'Árvores', xlab = 'Volume', col = 'blue', outline = F)
+
+# Notch
+trees$Volume %>% boxplot(main = 'Árvores', xlab = 'Volume', col = 'blue', notch = T)
+
+# Dados do Gráfico
+trees$Volume %>% boxplot.stats()
+```
+
+VÁRIOS GRÁFICOS
+
+```{r}
+boxplot(trees)
+```
+
+AGREGAÇÃO
+
+```{r}
+InsectSprays
+spray <- aggregate(. ~ spray, data = InsectSprays, sum)
+spray
+```
+
+GRÁFICO DE BARRAS
+
+```{r}
+spray$count %>% barplot(col = gray.colors(6), xlab = 'Spray', ylab = 'Total', names.arg = spray$spray)
+box() # colocar moldura
+```
+
+GRÁFICOS DE SETOR
+
+```{r}
+spray$count %>% pie(labels = spray$spray, col = c(1:6), main = 'Spray')
+```
+
+PIZZA COM LEGENDA
+
+```{r}
+spray$count %>% pie(labels = spray$spray, col = c(1:6), main = 'Spray')
+legend('bottomright', legend = spray$spray, cex = 1, fill = c(1:6))
+```
+
+TABELA
+
+###
+library(stargazer)
+
+stargazer(iris) # Formato latex
+
+iris %>% stargazer(type = 'html') # Formato HTML
+
+iris %>% stargazer(type = 'text') # Formato texto
+
+iris %>% stargazer(out = 'iris.tex') # Salvar em disco
+###

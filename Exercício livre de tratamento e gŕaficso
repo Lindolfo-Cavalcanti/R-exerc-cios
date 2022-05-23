@@ -1,0 +1,84 @@
+```{r}
+setwd('~/R/Data')
+```
+
+```{r}
+dados <- read.csv('dados.csv', sep = ';')
+View(dados)
+colnames(dados) <- c('codigo', 'municipio', 'pib', 'empenho')
+colnames(dados)
+
+library(tidyverse)
+```
+```{r}
+glimpse(dados)
+```
+```{r}
+dados$codigo <- NULL
+head(dados)
+```
+
+```{r}
+hist(dados$empenho)
+hist(dados$pib)
+
+boxplot(dados$empenho)
+boxplot(dados$pib)
+```
+REMOVER OUTLIERS
+```{r}
+# PIB
+desv <- sd(dados$pib, na.rm = T)
+desv
+
+dados[dados$pib >= 2 * desv, ]$pib <- median(dados$pib)
+
+dados[dados$pib >= 2 * desv, ]$pib
+
+boxplot(dados$pib)
+hist(dados$pib)
+
+# EMPENHO
+desv2 <- sd(dados$empenho, na.rm = T)
+desv2
+
+dados[dados$empenho >= 2 * desv2, ]$empenho <- median(dados$empenho)
+
+dados[dados$empenho >= 2* desv2, ]$empenho
+
+boxplot(dados$empenho)
+hist(dados$empenho)
+```
+GRÁFICOS
+
+```{r}
+plot(dados$pib, dados$empenho) #Por enquanto não há correlação
+```
+
+MAIORES EMPENHOS
+
+```{r}
+Mempenho = dados[order(-dados$empenho),] %>% head(10) 
+Mempenho
+
+barplot(Mempenho$empenho, col= grey.colors(10), main = "Maiores Empenhos")
+```
+
+MAIORES PIB
+
+```{r}
+Mpib = dados[order(-dados$pib),] %>% head(10) 
+Mpib
+
+Mpib$pib %>% barplot(col = grey.colors(10), main = 'Maiores PIB')
+```
+
+PROPORÇÃO ENTRE EMPENHO E PIB
+
+```{r}
+dados$proporcao =   dados$empenho  / dados$pib 
+Mprop = dados[order(-dados$proporcao),] %>% head(10)
+Mprop
+
+barplot(Mprop$proporcao,col = grey.colors(10),las=2,main = "Maiores Gastos em Proporção ao PIB")
+```
